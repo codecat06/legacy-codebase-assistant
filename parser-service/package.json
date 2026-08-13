@@ -1,0 +1,14 @@
+{
+    "name": "codeintel-parser-service",
+    "version": "1.0.0",
+    "type": "module",
+    "private": true,
+    "scripts": {
+        "start": "node src/server.js"
+    },
+    "dependencies": {
+        "express": "^4.19.2",
+        "web-tree-sitter": "^0.24.4",
+        "tree-sitter-wasms": "^0.1.11"
+    }
+}
