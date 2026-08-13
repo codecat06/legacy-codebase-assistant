@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "jgit": "^0.12.0"
+  }
+}
