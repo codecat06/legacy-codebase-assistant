@@ -37,3 +37,7 @@ node_modules/
 
 ### App runtime data ###
 data/
+
+### Frontend (Vite) ###
+frontend/dist/
+frontend/.vite/
