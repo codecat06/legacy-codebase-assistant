@@ -20,7 +20,7 @@ public class EmbeddingService {
     private final EmbeddingClient embeddingClient;
     private final QdrantClient qdrantClient;
 
-    public void embedAll(UUID repositoryId, List<ParsedFile> files, Map<String, UUID> methodNodeIdsByFqn) {
+    public void embedAll(UUID repositoryId, List<ParsedFile> files, Map<String, List<UUID>> methodNodeIdsByFqn) {
         qdrantClient.ensureCollection(VECTOR_SIZE);
 
         int embedded = 0;
@@ -32,12 +32,15 @@ public class EmbeddingService {
 
                 for (ParsedMethod method : cls.methods()) {
                     String methodFqn = classFqn + "." + method.name();
-                    UUID nodeId = methodNodeIdsByFqn.get(methodFqn);
+                    List<UUID> nodeIds = methodNodeIdsByFqn.get(methodFqn);
 
-                    if (nodeId == null || method.sourceText() == null || method.sourceText().isBlank()) {
+                    if (nodeIds == null || nodeIds.isEmpty()
+                            || method.sourceText() == null || method.sourceText().isBlank()) {
                         skipped++;
                         continue;
                     }
+
+                    UUID nodeId = nodeIds.get(0);
 
                     List<Double> vector = embeddingClient.embed(method.sourceText());
 

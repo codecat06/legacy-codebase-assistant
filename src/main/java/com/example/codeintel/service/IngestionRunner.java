@@ -55,7 +55,7 @@ public class IngestionRunner {
             job.setStatus(IngestionStatus.GRAPH_BUILDING);
             jobDao.save(job);
 
-            Map<String, UUID> methodNodeIdsByFqn = graphBuilderService.build(repo.getId(), parsedFiles);
+            Map<String, List<UUID>> methodNodeIdsByFqn = graphBuilderService.build(repo.getId(), parsedFiles);
 
             job.setStatus(IngestionStatus.EMBEDDING);
             jobDao.save(job);
