@@ -20,11 +20,8 @@ public class IngestionService {
     private final IngestionRunner ingestionRunner;
 
     public IngestionJob startIngestion(String name, String remoteUrl) {
-        GitRepo repo = new GitRepo();
-        repo.setName(name);
-        repo.setRemoteUrl(remoteUrl);
-        repo.setLocalPath("");
-        repo = repositoryDao.save(repo);
+        GitRepo repo = repositoryDao.findByRemoteUrl(remoteUrl)
+                .orElseGet(() -> createRepo(name, remoteUrl));
 
         IngestionJob job = new IngestionJob();
         job.setRepo(repo);
@@ -33,5 +30,13 @@ public class IngestionService {
 
         ingestionRunner.run(job.getId(), repo.getId());
         return job;
+    }
+
+    private GitRepo createRepo(String name, String remoteUrl) {
+        GitRepo repo = new GitRepo();
+        repo.setName(name);
+        repo.setRemoteUrl(remoteUrl);
+        repo.setLocalPath("");
+        return repositoryDao.save(repo);
     }
 }

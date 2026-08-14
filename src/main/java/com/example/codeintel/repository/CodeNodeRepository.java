@@ -8,4 +8,7 @@ import java.util.*;
 public interface CodeNodeRepository extends JpaRepository<CodeNode, UUID> {
 
     List<CodeNode> findByFqn(String fqn);
+
+    List<CodeNode> findByRepoId(UUID repoId);
+
 }
