@@ -3,6 +3,8 @@ package com.example.codeintel.service;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
+import com.example.codeintel.dto.QdrantSearchResult;
+
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -45,5 +47,18 @@ public class QdrantClient {
                         "payload", payload))))
                 .retrieve()
                 .toBodilessEntity();
+    }
+
+    private record SearchRequest(List<Double> vector, int limit, boolean with_payload) {
+    }
+
+    private record SearchResponse(List<QdrantSearchResult> result) {
+    }
+
+    public List<QdrantSearchResult> search(List<Double> queryVector, int limit) {
+        SearchResponse response = restClient.post().uri("/collections/{name}/points/search", collectionName)
+                .body(new SearchRequest(queryVector, limit, true)).retrieve().body(SearchResponse.class);
+
+        return response.result();
     }
 }
