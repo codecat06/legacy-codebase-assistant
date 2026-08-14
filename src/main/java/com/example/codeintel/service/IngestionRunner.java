@@ -32,6 +32,7 @@ public class IngestionRunner {
     private final ParserClient parserClient;
     private final GraphBuilderService graphBuilderService;
     private final EmbeddingService embeddingService;
+    private final RepositoryCleanupService repositoryCleanupService;
 
     @Async
     public void run(UUID jobId, UUID repoId) {
@@ -46,6 +47,8 @@ public class IngestionRunner {
             Path localPath = cloneService.clone(repo.getRemoteUrl(), repo.getId());
             repo.setLocalPath(localPath.toString());
             repositoryDao.save(repo);
+
+            repositoryCleanupService.cleanup(repo.getId());
 
             job.setStatus(IngestionStatus.PARSING);
             jobDao.save(job);
