@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 public class GraphTraversalService {
     private final CodeEdgeRepository edgeDao;
 
-    public Set<UUID> expand(Set<UUID> seedIds, int maxHops) {
+    private Set<UUID> directionalExpand(Set<UUID> seedIds, int maxHops, boolean upstream) {
         Set<UUID> visited = new HashSet<>(seedIds);
         Set<UUID> frontier = new HashSet<>(seedIds);
 
@@ -24,12 +24,14 @@ public class GraphTraversalService {
             Set<UUID> next = new HashSet<>();
 
             for (UUID nodeId : frontier) {
-                for (CodeEdge edge : edgeDao.findBySourceId(nodeId)) {
-                    next.add(edge.getTarget().getId());
-                }
-
-                for (CodeEdge edge : edgeDao.findByTargetId(nodeId)) {
-                    next.add(edge.getSource().getId());
+                if (upstream) {
+                    for (CodeEdge edge : edgeDao.findByTargetId(nodeId)) {
+                        next.add(edge.getSource().getId()); // bunu kim çağırıyor
+                    }
+                } else {
+                    for (CodeEdge edge : edgeDao.findBySourceId(nodeId)) {
+                        next.add(edge.getTarget().getId()); // bu neyi çağırıyor
+                    }
                 }
             }
 
@@ -39,8 +41,16 @@ public class GraphTraversalService {
 
             visited.addAll(next);
             frontier = next;
-
         }
+
         return visited;
+    }
+
+    public Set<UUID> expandUpstream(Set<UUID> seedIds, int maxHops) {
+        return directionalExpand(seedIds, maxHops, true);
+    }
+
+    public Set<UUID> expandDownstream(Set<UUID> seedIds, int maxHops) {
+        return directionalExpand(seedIds, maxHops, false);
     }
 }
