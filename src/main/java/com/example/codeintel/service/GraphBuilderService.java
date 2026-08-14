@@ -33,11 +33,12 @@ public class GraphBuilderService {
     private final CodeEdgeRepository edgeDao;
     private final GitRepoRepository repositoryDao;
 
-    public void build(UUID repositoryId, List<ParsedFile> files) {
+    public Map<String, UUID> build(UUID repositoryId, List<ParsedFile> files) {
         GitRepo repo = repositoryDao.findById(repositoryId).orElseThrow();
 
         Map<String, List<ClassEntry>> classesBySimpleName = new HashMap<>();
         Map<String, ClassEntry> classesByFqn = new HashMap<>();
+        Map<String, UUID> methodNodeIdsByFqn = new HashMap<>();
 
         // Pass 1: her class/method için bir CodeNode yarat, çözümleme için bir index
         // kur
@@ -65,6 +66,8 @@ public class GraphBuilderService {
                     methodNode.setFqn(classFqn + "." + method.name());
                     methodNode.setFilePath(file.file());
                     methodNode = nodeDao.save(methodNode);
+
+                    methodNodeIdsByFqn.put(classFqn + "." + method.name(), methodNode.getId());
 
                     methodNodeIds
                             .computeIfAbsent(method.name(), k -> new ArrayList<>())
@@ -120,6 +123,8 @@ public class GraphBuilderService {
 
         log.info("Graph build finished for repo {}: {} edge(s) created, {} call(s) unresolved",
                 repositoryId, created, skipped);
+
+        return methodNodeIdsByFqn;
     }
 
     private UUID resolveCallTarget(

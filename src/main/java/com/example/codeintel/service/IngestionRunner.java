@@ -19,6 +19,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.Map; // ← yeni eklenen
 
 @Slf4j
 @Service
@@ -30,6 +31,7 @@ public class IngestionRunner {
     private final GitCloneService cloneService;
     private final ParserClient parserClient;
     private final GraphBuilderService graphBuilderService;
+    private final EmbeddingService embeddingService;
 
     @Async
     public void run(UUID jobId, UUID repoId) {
@@ -53,7 +55,12 @@ public class IngestionRunner {
             job.setStatus(IngestionStatus.GRAPH_BUILDING);
             jobDao.save(job);
 
-            graphBuilderService.build(repo.getId(), parsedFiles);
+            Map<String, UUID> methodNodeIdsByFqn = graphBuilderService.build(repo.getId(), parsedFiles);
+
+            job.setStatus(IngestionStatus.EMBEDDING);
+            jobDao.save(job);
+
+            embeddingService.embedAll(repo.getId(), parsedFiles, methodNodeIdsByFqn);
 
             job.setStatus(IngestionStatus.DONE);
             job.setFinishedAt(Instant.now());

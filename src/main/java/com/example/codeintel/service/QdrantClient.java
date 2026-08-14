@@ -31,7 +31,8 @@ public class QdrantClient {
                     .retrieve()
                     .toBodilessEntity();
         } catch (Exception e) {
-            log.debug("Collection '{}' may already exist: {}", collectionName, e.getMessage());
+            // log.debug("Collection '{}' may already exist: {}", collectionName,
+            // e.getMessage());
         }
     }
 
