@@ -22,6 +22,9 @@ public class CodeNode {
     @UuidGenerator
     private UUID id;
 
+    @Column(name = "source_text", columnDefinition = "text")
+    private String sourceText;
+
     @ManyToOne
     @JoinColumn(name = "repository_id")
     private GitRepo repo;

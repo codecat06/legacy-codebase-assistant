@@ -65,6 +65,8 @@ public class GraphBuilderService {
                     methodNode.setNodeType(NodeType.METHOD);
                     methodNode.setFqn(classFqn + "." + method.name());
                     methodNode.setFilePath(file.file());
+                    methodNode.setSourceText(method.sourceText());
+
                     methodNode = nodeDao.save(methodNode);
 
                     methodNodeIdsByFqn
