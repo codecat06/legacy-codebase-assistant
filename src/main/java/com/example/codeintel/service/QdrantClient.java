@@ -61,4 +61,14 @@ public class QdrantClient {
 
         return response.result();
     }
+
+    public void deleteByRepository(UUID repositoryId) {
+        restClient.post()
+                .uri("/collections/{name}/points/delete", collectionName)
+                .body(Map.of("filter", Map.of("must", List.of(
+                        Map.of("key", "repositoryId", "match", Map.of("value", repositoryId.toString()))))))
+                .retrieve()
+                .toBodilessEntity();
+    }
+
 }
