@@ -80,6 +80,8 @@ function extractMethods(classBodyNode) {
                 annotations: extractAnnotations(member),
                 params: extractParams(paramsNode),
                 calls: extractCalls(bodyNode),
+                sourceText: member.text,
+                startLine: member.startPosition.row + 1,
             });
         }
     }

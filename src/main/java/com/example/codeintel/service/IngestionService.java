@@ -6,7 +6,6 @@ import com.example.codeintel.entity.IngestionStatus;
 import com.example.codeintel.repository.GitRepoRepository;
 import com.example.codeintel.repository.IngestionJobRepository;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,7 +19,6 @@ public class IngestionService {
     private final IngestionJobRepository jobDao;
     private final IngestionRunner ingestionRunner;
 
-    @Transactional
     public IngestionJob startIngestion(String name, String remoteUrl) {
         GitRepo repo = new GitRepo();
         repo.setName(name);

@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,6 +29,7 @@ public class IngestionRunner {
     private final IngestionJobRepository jobDao;
     private final GitCloneService cloneService;
     private final ParserClient parserClient;
+    private final GraphBuilderService graphBuilderService;
 
     @Async
     public void run(UUID jobId, UUID repoId) {
@@ -46,7 +48,12 @@ public class IngestionRunner {
             job.setStatus(IngestionStatus.PARSING);
             jobDao.save(job);
 
-            parseRepository(localPath.toFile());
+            List<ParsedFile> parsedFiles = parseRepository(localPath.toFile());
+
+            job.setStatus(IngestionStatus.GRAPH_BUILDING);
+            jobDao.save(job);
+
+            graphBuilderService.build(repo.getId(), parsedFiles);
 
             job.setStatus(IngestionStatus.DONE);
             job.setFinishedAt(Instant.now());
@@ -61,7 +68,9 @@ public class IngestionRunner {
         }
     }
 
-    private void parseRepository(File repoDir) throws IOException {
+    private List<ParsedFile> parseRepository(File repoDir) throws IOException {
+        List<ParsedFile> results = new ArrayList<>();
+
         try (var paths = Files.walk(repoDir.toPath())) {
             List<Path> javaFiles = paths
                     .filter(p -> p.toString().endsWith(".java"))
@@ -74,8 +83,10 @@ public class IngestionRunner {
                 String relativePath = repoDir.toPath().relativize(path).toString();
 
                 ParsedFile parsed = parserClient.parse(relativePath, content);
-                log.info("Parsed {}: {} class(es)", relativePath, parsed.classes().size());
+                results.add(parsed);
             }
         }
+
+        return results;
     }
 }
